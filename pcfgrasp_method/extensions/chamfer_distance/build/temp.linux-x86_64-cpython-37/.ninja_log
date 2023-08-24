@@ -1,0 +1,5 @@
+# ninja log v5
+0	4898	1677810696406143256	/home/cyf/PCF-Grasp/pcfgrasp_method/extensions/chamfer_distance/build/temp.linux-x86_64-cpython-37/chamfer3D.o	391991b189c48e3a
+1	10555	1677810702062069063	/home/cyf/PCF-Grasp/pcfgrasp_method/extensions/chamfer_distance/build/temp.linux-x86_64-cpython-37/chamfer_cuda.o	7a3d48e5b4b70d89
+1	4726	1677813442208657661	/home/cyf/PCF-Grasp/pcfgrasp_method/extensions/chamfer_distance/build/temp.linux-x86_64-cpython-37/chamfer3D.o	47604d2b9a5f6cb4
+1	10270	1677813447752193264	/home/cyf/PCF-Grasp/pcfgrasp_method/extensions/chamfer_distance/build/temp.linux-x86_64-cpython-37/chamfer_cuda.o	87d00ed2c286d894
