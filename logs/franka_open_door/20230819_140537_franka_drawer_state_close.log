@@ -1,3 +1,0 @@
-2023-08-19 14:06:07,645 - log - INFO - Epoch: [0][1/1] bce_score_loss:90.67113494873047
-2023-08-19 14:06:17,346 - log - INFO - Epoch: [0] bce_score_loss:89.2105712890625
-2023-08-19 14:06:17,371 - log - INFO - Model Saved in file: /home/cyf/task_grasp/ABCDEFG/logs/franka_open_door/model_08-19-14_epoch0.pt
