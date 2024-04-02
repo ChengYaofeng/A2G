@@ -1,0 +1,20 @@
+# if given, will override the device setting in gym. 
+
+policy: # only works for MlpPolicy right now
+  feature_dim: 256
+  topk_confidence: 1024  #200
+  training_env_num: 20
+  valitating_env_num: 5
+  num_env: 256     #每个step多少环境  20
+  batch_group_length: 3 #batch_size  3
+  max_epoch: 100
+  buffer_size: 1024 #这里应该和抓取的top_k的数量一致 300
+  num_sample_points: 1024  #抓取的采样点，这个在抓取网络训练的过程中就已经定死了
+  pointnet_sa_module:
+    group_all: true
+    mlp:
+    - 256
+    - 512
+    - 1024
+
+seed: -1
