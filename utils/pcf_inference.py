@@ -16,20 +16,23 @@ from pcfgrasp_method.mask_rcnn.demo.predictor import VisualizationDemo
 from pcfgrasp_method.mask_rcnn.demo.demo import setup_cfg
 # from utils.covert_pc import depth_image_to_pc_gpu
 from utils.vis_grasp import visualize_grasps_new
+from visual_point import vis_pc, vis_score_pc
+import os
 
-def pcfgrasp(bgr, depth, camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar, device):
+def pcfgrasp(bgr, depth, camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar, device, task=None):
     '''
     rgb 是 bgr格式
     
     return:
         PCF-Grasp中config选择的最后的top 20的抓取姿态和成绩  {np.ndarray}  20x4x4, 20
     '''
+    abs_dir = os.getcwd()
     args_dict = {}
-    args_dict['config_dir'] = '/home/cyf/task_grasp/RL_BUILDER/pcfgrasp_method/config.yaml' #pcf_config
+    args_dict['config_dir'] = f'{abs_dir}/pcfgrasp_method/config.yaml' #pcf_config
     args_dict['use_gpu'] = False  #gpu or cpu
-    args_dict['ckpt_dir'] = '/home/cyf/task_grasp/RL_BUILDER/pcfgrasp_method/checkpoints/train/03-07-08-05_best_train_94.pth'  #grasp model
+    args_dict['ckpt_dir'] = f'{abs_dir}/pcfgrasp_method/checkpoints/train/03-07-08-05_best_train_94.pth'  #grasp model
     args_dict['filter'] = False   #score filter
-    args_dict['pretrain_ckpt'] = '/home/cyf/task_grasp/RL_BUILDER/pcfgrasp_method/checkpoints/pretrain/03-05-14_best_pre_598.pth'
+    args_dict['pretrain_ckpt'] = f'{abs_dir}/pcfgrasp_method/checkpoints/pretrain/03-05-14_best_pre_598.pth'
     
     clobal_cfg_load = True
     
@@ -41,39 +44,10 @@ def pcfgrasp(bgr, depth, camera_view_matrix_inv, camera_proj_matrix, u, v, width
     grasp_estimatior = GraspEstimatior(global_config)
     
     mp.set_start_method("spawn", force=True)
-    ##### detectron mask ####
-    handle_path="/home/cyf/task_grasp/RL_BUILDER/pcfgrasp_method/mask_rcnn/graspnet_mask_rcnn/output/handle/OD_cfg.pickle"
-    with open(handle_path,'rb') as f:
-        cfg_handle=pickle.load(f)
-    #读取训练的模型生产一个预测器
-    cfg_handle.MODEL.WEIGHTS="/home/cyf/task_grasp/RL_BUILDER/pcfgrasp_method/mask_rcnn/graspnet_mask_rcnn/output/handle/model_final.pth"   # handle
-    cfg_handle.MODEL.ROI_HEADS.SCORE_THRESH_TEST=0.5   
-    predictor_handle=DefaultPredictor(cfg_handle)
-    outputs_handle=predictor_handle(bgr)
-
-    #############Visualize Mask###############11
-    
-    # vis=Visualizer(bgr[:,:,::-1],metadata={},scale=0.5,instance_mode=ColorMode.SEGMENTATION)
-    # vis=vis.draw_instance_predictions(outputs_handle["instances"].to("cpu"))
-
-    # WINDOW_NAME = "Handle detection"
-    # cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-    # # print(visualized_output.get_image()[:, :, ::-1].shape)  #(480, 640, 3)
-    # cv2.imshow(WINDOW_NAME, vis.get_image()[:, :, ::-1])
-    
-    # key_select = cv2.waitKey(0)
-    
-    ##########################################11
-    mask = outputs_handle['instances'].pred_masks.cpu().numpy() * depth
-    # print(mask)
-    # print(mask.shape)
-    # print(np.sum(mask))
-    
-    
-    ##########################################22
+    ##########################################25
     # mask_args = {}
-    # mask_args['config_file'] = '/home/cyf/PCF-Grasp/pcfgrasp_method/mask_rcnn/configs/COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x.yaml'
-    # mask_args['opts'] = ['MODEL.WEIGHTS', 'detectron2://COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x/139653917/model_final_2d9806.pkl']
+    # mask_args['config_file'] = '/home/cyf/task_grasp/A-G/pcfgrasp_method/mask_rcnn/configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml'
+    # mask_args['opts'] = ['MODEL.WEIGHTS', 'https://dl.fbaipublicfiles.com/detectron2/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x/138205316/model_final_a3ec72.pkl']
     # mask_args['confidence_threshold'] = 0.1
     
     # cfg_load = True
@@ -86,43 +60,66 @@ def pcfgrasp(bgr, depth, camera_view_matrix_inv, camera_proj_matrix, u, v, width
     # predictions, visualized_output = demo.run_on_image(bgr)
 
     # mask = predictions['instances'].pred_masks.cpu().numpy() * depth
-    # print(mask.shape)
-    ##############################################22
+    # # print(mask.shape)
+
+    ###############################################25
+    ###########################################
+    ##### detectron mask ####
+    if task == 'opendoor':
+        
+        # handle ---------------------mask rcnn version ----------------------
+        handle_path= f'{abs_dir}/pcfgrasp_method/mask_rcnn/graspnet_mask_rcnn/output/handle/OD_cfg.pickle'
+        with open(handle_path,'rb') as f:
+            cfg_handle=pickle.load(f)
+        #读取训练的模型生产一个预测器
+        cfg_handle.MODEL.WEIGHTS=f'{abs_dir}/pcfgrasp_method/mask_rcnn/graspnet_mask_rcnn/output/handle/model_final.pth'   # handle
+        cfg_handle.MODEL.ROI_HEADS.SCORE_THRESH_TEST=0.5   
+        predictor=DefaultPredictor(cfg_handle)
+        predictions=predictor(bgr)
+
+        mask = predictions['instances'].pred_masks.cpu().numpy() * depth
+        obj_pc = depth_image_to_pc_gpu(torch.tensor(mask[0]), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
+        # ---------------------------
+        # mask = cv2.imread(f'{abs_dir}/pic/1006handletop/handle10.png')
+        # target_depth = mask[:,:,0] * depth #640 480 np
+        # obj_pc = depth_image_to_pc_gpu(torch.tensor(target_depth), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
+        
+    elif task == 'pickup_obj':
+    ###################0825 night pick up   
+        mask = cv2.imread(f'{abs_dir}/pic/1012boxhigh/box_10.png')
+        target_depth = mask[:,:,0] * depth #640 480 np
+        obj_pc = depth_image_to_pc_gpu(torch.tensor(target_depth), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
+        
+    elif task == 'valve':
+        
+        handle_path=f'{abs_dir}/pcfgrasp_method/mask_rcnn/graspnet_mask_rcnn/output/valve/OD_cfg.pickle'
+        with open(handle_path,'rb') as f:
+            cfg_handle=pickle.load(f)
+        #读取训练的模型生产一个预测器
+        cfg_handle.MODEL.WEIGHTS=f'{abs_dir}/pcfgrasp_method/mask_rcnn/graspnet_mask_rcnn/output/valve/model_final.pth'  # handle
+        cfg_handle.MODEL.ROI_HEADS.SCORE_THRESH_TEST=0.5   
+        predictor=DefaultPredictor(cfg_handle)
+        predictions=predictor(bgr)
+
+        mask = predictions['instances'].pred_masks.cpu().numpy() * depth
+        
+        obj_pc = depth_image_to_pc_gpu(torch.tensor(mask[0]), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
+    else:
+        raise ValueError('task not define error')
     
-    ##### vis mask ####
-    # WINDOW_NAME = "Grasp detections"
+    
+    # # #############Visualize Mask###############11
+    # vis=Visualizer(bgr[:,:,::-1],metadata={},scale=0.5,instance_mode=ColorMode.SEGMENTATION)
+    # vis=vis.draw_instance_predictions(predictions["instances"].to("cpu"))
+
+    # WINDOW_NAME = "Handle detection"
     # cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
     # # print(visualized_output.get_image()[:, :, ::-1].shape)  #(480, 640, 3)
-
-    # cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
+    # cv2.imshow(WINDOW_NAME, vis.get_image()[:, :, ::-1])
+    
     # key_select = cv2.waitKey(0)
-    
-    pc_full = None
-    # segmap = None
-    # obj_pc = None
-    # cam_K = np.array([[659.394531 , 0. , 320.0 ],
-    #             [0. , 659.39455 , 240.0 ], 
-    #             [0. ,    0. ,       1. ]])
-    
-    # color_image = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-    # print(camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar)
-    # print(camera_view_matrix_inv)
-    # tensor([[-1.6440e-01,  9.8639e-01,  7.4506e-09, -0.0000e+00],
-    #     [ 5.4197e-01,  9.0328e-02,  8.3553e-01, -0.0000e+00],
-    #     [ 8.2416e-01,  1.3736e-01, -5.4944e-01, -0.0000e+00],
-    #     [ 2.0000e-01,  1.0000e-01,  8.0000e-01,  1.0000e+00]])
-    
-    obj_pc = depth_image_to_pc_gpu(torch.tensor(mask[0]), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
+    ############################################
 
-    # pc_full = depth_image_to_pc_gpu(torch.asarray(depth), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
-    # if pc_full is None:
-    #     pc_full, pc_segments, pc_colors = extract_point_clouds(depth, cam_K, segmap=segmap, rgb=color_image, skip_border_objects=False, z_range=[0.2, 1.2])
-        
-    # if obj_pc is None:
-    #     print('Converting depth to point cloud(s)...')
-    #     obj_pc, _, obj_colors = extract_point_clouds(mask[0], cam_K, segmap=segmap, rgb=color_image, skip_border_objects=False, z_range=[0.2, 1.2])
-
-    
     #################0819
     num_points = 100  # irrelevant point removal strategy
     radius = 0.01
@@ -133,6 +130,7 @@ def pcfgrasp(bgr, depth, camera_view_matrix_inv, camera_proj_matrix, u, v, width
     sor_pcd.paint_uniform_color([0, 0, 1])
 
     obj_pc = np.array(sor_pcd.points)
+    # vis_score_pc(torch.tensor(obj_pc), torch.tensor(obj_pc[:, 1])) #根据坐标看点云的位置
     #################
     print('Predicting grasps...')
     pred_grasps_cam, scores, idx, pred_points = grasp_estimatior.predict_scene_grasps(obj_pc, args_dict, pc_segments={}, forward_passes=1)
@@ -143,7 +141,7 @@ def pcfgrasp(bgr, depth, camera_view_matrix_inv, camera_proj_matrix, u, v, width
     return pred_grasps_cam[-1], scores[-1], idx, pred_points
 
 
-def depth_image_to_pc_gpu(camera_numpy, camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar=[0.2, 1.2]):
+def depth_image_to_pc_gpu(camera_numpy, camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar=[0.2, 2.0]):
     '''
     camera_tensor
     '''
@@ -196,3 +194,31 @@ def depth_image_to_pc_gpu(camera_numpy, camera_view_matrix_inv, camera_proj_matr
     points = points[(points[:,2] < 1.2) & (points[:,2] > 0.1)] #正
 
     return points
+
+############## 历史遗留
+    # pc_full = None
+    # segmap = None
+    # obj_pc = None
+    # cam_K = np.array([[659.394531 , 0. , 320.0 ],
+    #             [0. , 659.39455 , 240.0 ], 
+    #             [0. ,    0. ,       1. ]])
+    
+    # color_image = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+    # print(camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar)
+    # print(camera_view_matrix_inv)
+    # tensor([[-1.6440e-01,  9.8639e-01,  7.4506e-09, -0.0000e+00],
+    #     [ 5.4197e-01,  9.0328e-02,  8.3553e-01, -0.0000e+00],
+    #     [ 8.2416e-01,  1.3736e-01, -5.4944e-01, -0.0000e+00],
+    #     [ 2.0000e-01,  1.0000e-01,  8.0000e-01,  1.0000e+00]])
+    # print(mask[0].shape)
+
+    ####################################
+    # print(obj_pc.shape)
+
+    # pc_full = depth_image_to_pc_gpu(torch.asarray(depth), camera_view_matrix_inv, camera_proj_matrix, u, v, width, height, depth_bar).numpy()
+    # if pc_full is None:
+    #     pc_full, pc_segments, pc_colors = extract_point_clouds(depth, cam_K, segmap=segmap, rgb=color_image, skip_border_objects=False, z_range=[0.2, 1.2])
+        
+    # if obj_pc is None:
+    #     print('Converting depth to point cloud(s)...')
+    #     obj_pc, _, obj_colors = extract_point_clouds(mask[0], cam_K, segmap=segmap, rgb=color_image, skip_border_objects=False, z_range=[0.2, 1.2])

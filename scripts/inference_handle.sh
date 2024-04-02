@@ -9,14 +9,13 @@ export CUDA_VISIBLE_DEVICES=0
 
 python ./inference.py --task=OpenDoor \
                 --task_config=cfg/open_door.yaml \
-                --agent_config=cfg/agent/config.yaml \
                 --rl_device=cuda:0 \
                 --sim_device=cuda:0 \
                 --pipeline=cpu \
-                --model_dir='/home/cyf/task_grasp/ABCDEFG/logs/franka_open_door/model_08-13-18_epoch56.pt' \
-                # --headless \
-
-                # --test \
+                --model_dir='/home/cyf/task_grasp/A-G/logs/franka_open_door/test_loss_pn_model_11-09-20-11_epoch46.pt' \
+                --batch_size=1 \
+                --num_envs=1 \
+                --headless \
 
                 
     

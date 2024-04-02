@@ -9,14 +9,13 @@ export CUDA_VISIBLE_DEVICES=0
 
 python ./train.py --task=OpenDoor \
                 --task_config=cfg/open_door.yaml \
-                --agent_config=cfg/agent/config.yaml \
                 --rl_device=cuda:0 \
                 --sim_device=cuda:0 \
                 --pipeline=cpu \
-                # --headless \
+                --exp_parameter=test_loss_3_256 \
+                --batch_size=5 \
+                --num_envs=128 \
+                --max_epoch=100 \
+                --headless \
+                --dataset_path='/home/cyf/task_grasp/A-G/logs/franka_pick_up/dataset_1014_mas0.2_viewleft_useful' \
 
-                # --test \
-                # --model_dir='/home/cyf/task_grasp/RL_BUILDER/logs/franka_cabinet/ppo/ppo_seed1/model_16800.pt'  #70.9
-
-                
-    

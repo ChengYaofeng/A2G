@@ -1,0 +1,106 @@
+# if given, will override the device setting in gym. 
+
+task:
+  target: close
+  useHandle: False
+  useDrawer: True
+  useStage: False
+  useSlider: True
+  useGroundTruth: False
+
+env:
+  env_name: "rotate_valve"
+  numObservations: 55   #49
+  numActions: 11
+  envSpacing: 2.0
+
+  enableCameraSensors: True
+  depth_bar: 10
+  map_dis_bar: 0.1
+
+  driveMode: "pos"
+
+  reset:
+    cabinet:
+      resetPositionNoise: 0.0
+      resetRotationNoise: 0.0
+      resetDofPosRandomInterval: 0.0
+      resetDofVelRandomInterval: 0.0
+    franka:
+      resetPositionNoise: 0.0
+      resetRotationNoise: 0.0
+      resetDofPosRandomInterval: 0.0
+      resetDofVelRandomInterval: 0.0
+
+  driveMode: "pos"
+
+
+  asset:
+    assetRoot: "assets"
+    datasetPath: "dataset/one_drawer_cabinet"
+    cabinetAssetNumTrain: 0  #20
+    cabinetAssetNumVal: 0
+    randomAsset: False
+
+sim:
+  substeps: 2
+  physx:
+    num_threads: 4
+    solver_type: 1  # 0: pgs, 1: tgs
+    num_position_iterations: 8
+    num_velocity_iterations: 0
+    contact_offset: 0.002
+    rest_offset: 0.0
+    bounce_threshold_velocity: 0.2
+    max_depenetration_velocity: 1000.0
+    default_buffer_size_multiplier: 5.0
+  flex:
+    num_outer_iterations: 5
+    num_inner_iterations: 20
+    warm_start: 0.8
+    relaxation: 0.75 
+
+
+learn:
+  agent_name: shadow_hand
+  test: False
+  resume: 0
+  save_interval: 200 # check for potential saves every this many iterations
+  eval_interval: 10   # multiply by max_episode length
+  eval_round: 10
+  print_log: True
+
+  # rollout params
+  max_iterations: 50000
+
+  nminibatches: 1 # this is per agent
+  max_grad_norm: 1
+  optim_stepsize: 3.e-4 # 3e-4 is default for single agent training with constant schedule
+  schedule: adaptive # could be adaptive or linear or fixed
+  desired_kl: 0.008
+  gamma: 0.99
+  lam: 0.95
+  init_noise_std: 0.8
+
+  log_interval: 1
+  asymmetric: False
+
+
+policy: # only works for MlpPolicy right now
+  feature_dim: 256
+  topk_confidence: 1024  #200
+  training_env_num: 20
+  valitating_env_num: 5
+  num_env: 128     #每个step多少环境  20
+  batch_group_length: 1 #batch_size  3
+  max_epoch: 100
+  buffer_size: 1024 #这里应该和抓取的top_k的数量一致 300
+  num_sample_points: 1024  #抓取的采样点，这个在抓取网络训练的过程中就已经定死了
+  pointnet_sa_module:
+    group_all: true
+    mlp:
+    - 256
+    - 512
+    - 1024
+
+seed: -1

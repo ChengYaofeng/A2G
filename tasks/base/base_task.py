@@ -26,9 +26,8 @@ class BaseTask():
             self.graphics_device_id = -1
         
         # 环境数量
-        self.num_envs_train = cfg["env"]["numTrain"]
-        self.num_envs_val = cfg["env"]["numVal"]
-        self.num_envs = cfg["env"]["numTrain"] + cfg['env']['numVal']
+        self.num_envs = cfg["policy"]["num_env"]
+
         # 观察空间，状态，动作数量
         self.num_obs = cfg["env"]["numObservations"]
         self.num_states = cfg["env"].get("numStates", 0)
@@ -38,14 +37,14 @@ class BaseTask():
         torch._C._jit_set_profiling_mode(False)
         torch._C._jit_set_profiling_executor(False)
         
-        # allocate buffers  这里要提前定义吗？ 要提前定义，因为每个task都有
-        self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
-        self.states_buf = torch.zeros((self.num_envs, self.num_states), device=self.device, dtype=torch.float)
-        self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
-        self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)    #0表示不reset，1表示reset
-        self.progress_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)  #处理进度
-        self.randomize_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
-        self.extras = {}   #用来将成功与否和成功率的信息从env传递到vec_env，最后给agent
+        # # allocate buffers  这里要提前定义吗？ 要提前定义，因为每个task都有
+        # self.obs_buf = torch.zeros((self.num_envs, self.num_obs), device=self.device, dtype=torch.float)
+        # self.states_buf = torch.zeros((self.num_envs, self.num_states), device=self.device, dtype=torch.float)
+        # self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
+        # self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)    #0表示不reset，1表示reset
+        # self.progress_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)  #处理进度
+        # self.randomize_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
+        # self.extras = {}   #用来将成功与否和成功率的信息从env传递到vec_env，最后给agent
         
         self.dr_randomizations = {}
         

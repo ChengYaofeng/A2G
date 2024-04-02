@@ -9,30 +9,16 @@ task:
   useGroundTruth: False
 
 env:
-  env_name: "franka_drawer_state_close"
-  numTrain: 16  #20
-  numVal: 0
+  env_name: "open_door"
   numObservations: 55   #49
   numActions: 11
   envSpacing: 2.0
-  maxEpisodeLength: 192
-  actionSpeedScale: 20
-  enableDebugVis: False
-
-  contactBufferSize: 512
-  contactMovingThreshold: 0.1
-  contactPosThreshold: 0.01
-
-  pointFeatureDim: 512
-  cabinetPointDownsampleNum: 2048
-  cabinetPointOriginalNum: 8192
-  handPointDownsampleNum: 64
-  pointNetLR: 0.0001
-  visualizePointcloud: False
 
   enableCameraSensors: True
   depth_bar: 10
   map_dis_bar: 0.1
+
+  driveMode: "pos"
 
   reset:
     cabinet:
@@ -47,8 +33,7 @@ env:
       resetDofVelRandomInterval: 0.0
 
   driveMode: "pos"
-  clipObservations: 5.0
-  clipActions: 1.0
+
 
   asset:
     assetRoot: "assets"
@@ -74,3 +59,48 @@ sim:
     num_inner_iterations: 20
     warm_start: 0.8
     relaxation: 0.75 
+
+
+learn:
+  agent_name: shadow_hand
+  test: False
+  resume: 0
+  save_interval: 200 # check for potential saves every this many iterations
+  eval_interval: 10   # multiply by max_episode length
+  eval_round: 10
+  print_log: True
+
+  # rollout params
+  max_iterations: 50000
+
+  nminibatches: 1 # this is per agent
+  max_grad_norm: 1
+  optim_stepsize: 3.e-4 # 3e-4 is default for single agent training with constant schedule
+  schedule: adaptive # could be adaptive or linear or fixed
+  desired_kl: 0.008
+  gamma: 0.99
+  lam: 0.95
+  init_noise_std: 0.8
+
+  log_interval: 1
+  asymmetric: False
+
+
+policy: # only works for MlpPolicy right now
+  feature_dim: 256
+  topk_confidence: 1024  #200
+  training_env_num: 20
+  valitating_env_num: 5
+  num_env: 256     #每个step多少环境  20
+  batch_group_length: 3 #batch_size  3
+  max_epoch: 100
+  buffer_size: 1024 #这里应该和抓取的top_k的数量一致 300
+  num_sample_points: 1024  #抓取的采样点，这个在抓取网络训练的过程中就已经定死了
+  pointnet_sa_module:
+    group_all: true
+    mlp:
+    - 256
+    - 512
+    - 1024
+
+seed: -1

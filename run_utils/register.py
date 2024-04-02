@@ -21,13 +21,13 @@ from tasks import *
 from agents import *
 
 
-def gen_task(args, cfg, cfg_train, sim_params, logdir):
+def gen_task(args, cfg, sim_params, logdir):
     
     #
     device_id = args.device_id
     rl_device = args.rl_device
     
-    cfg['seed'] = cfg_train.get('seed', -1)
+    cfg['seed'] = cfg.get('seed', -1)
     cfg_task = cfg["env"]
     cfg_task["seed"] = cfg["seed"]
 
@@ -51,21 +51,26 @@ def gen_task(args, cfg, cfg_train, sim_params, logdir):
     
     if args.task == 'OpenDoor':
         env = VecTaskArm(task, rl_device)
+    elif args.task == 'PickUp':
+        env = VecTaskArm(task, rl_device)
+    elif args.task == 'Valve':
+        env = VecTaskArm(task, rl_device)
 
     else:
         print('No env corresponding to task: {}'.format(args.task))
         
     return env
 
-def gen_agent(args, env, cfg_train, logdir):
+def gen_agent(args, env, cfg, logdir):
     
-    learn_cfg = cfg_train["learn"]
+    # print(cfg)
+    learn_cfg = cfg["learn"]
     is_testing = learn_cfg["test"]
     
     if args.model_dir != "":
         # is_testing = True
         chkpt_path = args.model_dir
-        
+                
     logdir = logdir
 
     # print('-'*20, 'agents', AGENTS.name(), '-'*20)
@@ -75,9 +80,10 @@ def gen_agent(args, env, cfg_train, logdir):
     agent = AGENTS.name()['real_time_sim'](
             vec_env=env,
             num_mini_batches=learn_cfg["nminibatches"],
-            model_cfg=cfg_train["policy"],
+            policy_cfg=cfg["policy"],
             device=env.rl_device,
             log_dir=logdir,
+            log_subname=args.exp_parameter,
             is_testing=is_testing,
             print_log=learn_cfg["print_log"],
             apply_reset=False,

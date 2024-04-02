@@ -22,24 +22,31 @@ def retrieve_cfg(args):
 
     if args.task == 'OpenDoor':
         log_dir = os.path.join(args.logdir, "franka_open_door")
-        algo_cfg = "cfg/agent/config.yaml"
-        task_cfg = "cfg/open_door.yaml"   
-        
+        # algo_cfg = "cfg/agent/config.yaml"
+        task_cfg = "cfg/open_door.yaml"
+    elif args.task == 'PickUp':
+        log_dir = os.path.join(args.logdir, "franka_pick_up")
+        # algo_cfg = "cfg/agent/config.yaml"
+        task_cfg = "cfg/pickup_obj.yaml"
+    elif args.task == 'Valve':
+        log_dir = os.path.join(args.logdir, "franka_rotate_valve")
+        # algo_cfg = "cfg/agent/config.yaml"
+        task_cfg = "cfg/rotate_valve.yaml" 
     else:
         warn_task_name()
     if args.task_config != None :
         task_cfg = args.task_config
-    if args.agent_config != None :
-        algo_cfg = args.agent_config
+    # if args.agent_config != None :
+    #     algo_cfg = args.agent_config
     
-    return log_dir, algo_cfg, task_cfg
+    return log_dir, task_cfg#, algo_cfg,
 
 def get_args():
     
     custom_parameters = [
         {"name": "--task", "type": str, "default": 'open_cabinet', "help": "Run trained policy, no training"},
         {"name": "--task_config", "type": str, "default": None, "help": "Whether to force config file for the task"},
-        {"name": "--agent_config", "type": str, "default": None, "help": "Whether to force config file for the algorithm"},
+        # {"name": "--agent_config", "type": str, "default": None, "help": "Whether to force config file for the algorithm"},
         {"name": "--rl_device", "type": str, "default": "default", "help": "Choose CPU or GPU device for inferencing policy network"},
         {"name": "--device", "type": str, "default": "cuda", "help": "Choose CPU or GPU device for training and inferencing collision predictor, available only for CP tasks"},
         {"name": "--headless", "action": "store_true", "default": False, "help": "Force display off at all times"},
@@ -47,7 +54,6 @@ def get_args():
         {"name": "--play", "action": "store_true", "default": False, "help": "Run trained policy, the same as test, can be used only by rl_games RL library"},
         {"name": "--resume", "type": int, "default": 0, "help": "Resume training or start testing from a checkpoint"},
         {"name": "--checkpoint", "type": str, "default": "Base", "help": "Path to the saved weights, only for rl_games RL library"},
-        {"name": "--num_envs", "type": int, "default": 0, "help": "Number of environments to train - override config file"},
         {"name": "--num_envs_val", "type": int, "default": 0, "help": "Number of environments to validate - override config file"},
         {"name": "--num_objs", "type": int, "default": 0, "help": "Number of objects to train - override config file"},
         {"name": "--num_objs_val", "type": int, "default": 0, "help": "Number of objects to validate - override config file"},
@@ -59,9 +65,14 @@ def get_args():
         {"name": "--experiment", "type": str, "default": "Base", "help": "Experiment name. If used with --metadata flag an additional information about physics engine, sim device, pipeline and domain randomization will be added to the name"},
         {"name": "--visualize_pc", "action": "store_true", "default": False, "help": "Open a window to show the point cloud of the first environment"},
         {"name": "--model_dir", "type": str, "default": "", "help": "Choose a model dir"},
-        {"name": "--cfg_train", "type": str, "default": "Base"},
+        # {"name": "--cfg_train", "type": str, "default": "Base"},
         {"name": "--logdir", "type": str, "default": "logs/"},
         {"name": "--cfg_env", "type": str, "default": "Base"},
+        {"name": "--dataset_path", "type": str, "default": None},
+        {"name": "--exp_parameter", "type": str, "default": None},
+        {"name": "--batch_size", "type": int, "default": 1},
+        {"name": "--num_envs", "type": int, "default": 1, "help": "Number of environments to train - override config file"},
+        {"name": "--max_epoch", "type": int, "default": None},
     ]
     
     # parse arguments
@@ -78,21 +89,23 @@ def get_args():
     else:
         args.train = True
     
-    logdir, cfg_train, cfg_env = retrieve_cfg(args)
+    # logdir, cfg_train, cfg_env = retrieve_cfg(args)
+    logdir, cfg_task = retrieve_cfg(args)
+    
     
     # use custom parameters if provided by user
     if args.logdir == "logs/":
         args.logdir = logdir
     
-    if args.cfg_train == "Base":
-        args.cfg_train = cfg_train
+    # if args.cfg_train == "Base":
+    #     args.cfg_train = cfg_train
     
     if args.cfg_env == "Base":
-        args.cfg_env = cfg_env
+        args.cfg_task = cfg_task
     
     return args
 
-def gen_sim_params(args, cfg, cfg_train):
+def gen_sim_params(args, cfg):
     # initialize sim
     sim_params = gymapi.SimParams()
     sim_params.dt = 1./180

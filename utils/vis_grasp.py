@@ -16,7 +16,7 @@ def visualize_grasps_new(pc, grasp_pose, scores=None, pc_colors=None):
     else:
         scene.add_points(pc, color='white', point_size=4)
         
-    # draw_grasps(grasp_pose, np.eye(4), scene)
+    draw_grasps(grasp_pose, np.eye(4), scene)
     
     scene.show()
 

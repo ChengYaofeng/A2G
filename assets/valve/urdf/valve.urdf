@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="valve">
+  <link
+    name="base_link">
+    <inertial>
+      <origin xyz="0. 0. 0." rpy="0 0 0" />
+      <mass value="10." />
+      <inertia
+        ixx="33.355"
+        ixy="6.996E-17"
+        ixz="5.6201E-32"
+        iyy="41.667"
+        iyz="-1.9012E-15"
+        izz="8.3546" />
+    </inertial>
+<!-- 
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://valve/meshes/base_link.STL" />
+      </geometry>
+      <material name="metal">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual> -->
+
+    <!-- <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://valve/meshes/base_link.STL" />
+      </geometry>
+    </collision> -->
+  </link>
+  <link
+    name="link_1">
+    <inertial>
+      <origin xyz="4.017E-08 8.8129E-08 0.015" rpy="0 0 0" />
+      <mass value="0.01" />
+      <inertia
+        ixx="0.020243"
+        ixy="4.6844E-09"
+        ixz="-5.1511E-09"
+        iyy="0.020243"
+        iyz="1.5428E-09"
+        izz="0.04034" />
+    </inertial>
+
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0. 1.5708 1.5708" />
+      <!-- <origin xyz="0.0 0.0 0.0" rpy="0. 1.5708 1.04" /> -->
+      <!-- <origin xyz="0 0 0" rpy="0. 1.5708 0.7854" /> -->
+      <!-- <origin xyz="0 0 0" rpy="0. 1.5708 0." /> -->
+
+
+      <geometry>
+        <mesh filename="package://valve/meshes/valve.obj" />
+      </geometry>
+
+      <material name="Front">
+        <color rgba="0.8 0.2 0.2 1" />
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0. 1.5708 1.5708" />
+      <!-- <origin xyz="0.0 0.0 0.0" rpy="0. 1.5708 1.04" /> -->
+      <!-- <origin xyz="0 0 0" rpy="0. 1.5708 0.7854" /> -->
+      <geometry>
+        <mesh
+          filename="package://valve/meshes/valve_0.0025.obj" />
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="joint_1" type="revolute">
+    <origin xyz="0 -0.1 0" rpy="1.5708 0 0" />
+    <parent link="base_link" />
+    <child link="link_1" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="2.047" effort="100" velocity="1" />
+  </joint>
+</robot>

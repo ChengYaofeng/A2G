@@ -23,7 +23,7 @@ class VecTask():
 
         print("RL device: ", rl_device)
 
-    def step(self, actions):
+    def step(self, actions, sample_points):
         raise NotImplementedError
 
     def reset(self):
@@ -54,14 +54,14 @@ class VecTask():
     
     
 class VecTaskArm(VecTask):
-    def get_state(self):
-        return torch.clamp(self.task.states_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
+    # def get_state(self):
+    #     return torch.clamp(self.task.states_buf, -self.clip_obs, self.clip_obs).to(self.rl_device)
     
-    def step(self, grasp_poses):
+    def step(self, grasp_poses, sample_points):
 
         self.task.end_sim_flag = False
         self.task._partial_reset()
-        per_step_force = self.task.step(grasp_poses)
+        per_step_force = self.task.step(grasp_poses, sample_points)
         # print("per_step_force", per_step_force)
         return per_step_force #num_envs产生的力
 
@@ -69,6 +69,7 @@ class VecTaskArm(VecTask):
 
         # step the simulator
         grasp_poses, agnostic_high_idx, sample_points = self.task.reset()
+        # print("grasp_poses", grasp_poses.shape)
         
         grasp_poses = torch.from_numpy(grasp_poses).to(self.rl_device)  #因为后面在move_ee中调整了一下
         agnostic_high_idx = torch.from_numpy(agnostic_high_idx).to(self.rl_device)
@@ -76,5 +77,9 @@ class VecTaskArm(VecTask):
 
         return grasp_poses, agnostic_high_idx, sample_points
     
-    
+    def capture_4_seg(self, pic_nums):
+        
+        for i in range(pic_nums):
+            self.task.capture_4_seg(i+10)
+        
     

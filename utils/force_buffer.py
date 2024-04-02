@@ -42,17 +42,25 @@ class ForceBuffer:
         #用self.top标记buffer的位置
         self.buffer_force[self.top:self.top+per_step_size].copy_(batch)
         self.top += per_step_size
+        #将buffer_force的值进行归一化
         if self.top == self.buffer_size:
-            self.buffer_check = True
-            # _, self.idx = torch.topk(torch.sigmoid(self.buffer_force), self.top_k, dim=0)  #这里选定top50的为1，其他的为0
+            max_score = torch.max(self.buffer_force)
+            min_score = torch.min(self.buffer_force)
+            # print(max_score, min_score)
+            self.buffer_force = (self.buffer_force - min_score + 0.00001) / (max_score - min_score + 0.00001)
+
+        #####删除topk取值
+        # if self.top == self.buffer_size:
+        #     self.buffer_check = True
+        #     # _, self.idx = torch.topk(torch.sigmoid(self.buffer_force), self.top_k, dim=0)  #这里选定top50的为1，其他的为0
             
-            # force_mask = torch.nonzero(self.buffer_force)
+        #     # force_mask = torch.nonzero(self.buffer_force)
             
-            _, self.idx = torch.topk(self.buffer_force, self.top_k, dim=0)  #这里选定top50的为1，其他的为0
-            # print(self.idx.shape, 'self.idx.shape')
-            ##0703
-            # self.buffer[self.idx] = 0
-            self.buffer[self.idx] = 1
+        #     _, self.idx = torch.topk(self.buffer_force, self.top_k, dim=0)  #这里选定top50的为1，其他的为0
+        #     # print(self.idx.shape, 'self.idx.shape')
+        #     ##0703
+        #     # self.buffer[self.idx] = 0
+        #     self.buffer[self.idx] = 1
             
     
     def buffer_reset(self):
@@ -63,13 +71,14 @@ class ForceBuffer:
         self.top = 0
         self.buffer = torch.zeros((self.buffer_size, self.content_dim), device=self.device)
         
-        return self.idx
+        # return self.idx
             
     def all_label(self):
         # label = torch.unsqueeze(self.buffer, dim=0)
         # return label[:, :self.top, :]
         ##0707
         # return self.buffer[:self.top, :]
+        # print(self.buffer_force[:self.top, :])
         return self.buffer_force[:self.top, :]
     
         

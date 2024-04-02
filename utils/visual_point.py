@@ -2,6 +2,7 @@ import open3d as o3d
 import numpy as np
 from matplotlib import cm
 import matplotlib.pyplot as plt
+import torch
 
 def vis_pc(pc):
     """
@@ -37,22 +38,22 @@ def vis_score_pc(pc, scores):
         
         tensor: N x 1
     """
-    # while True:
-    # print(scores.shape)
-    # print(pc.shape)
-    task_score = scores.detach().cpu().squeeze(0).numpy()
-    # print(task_score)
-    # print(task_score.shape) N 1
-    # vis_score(task_score)
+    # print(scores)
+    # print(type(pc))
+    if type(pc) == torch.Tensor:
+        pc = pc.detach().cpu().numpy()
+    # pc = pc.detach().cpu().numpy() # N x 3
+    task_score = scores.detach().cpu().squeeze(0).numpy() # N 1
+
     max_score = np.max(task_score)
     min_score = np.min(task_score)
-    norm_score = (task_score - min_score) / (max_score - min_score)
+    norm_score = (task_score - min_score + 0.00001) / (max_score - min_score + 0.00001)
     # norm_score = (task_score - max_score) / -(max_score - min_score)
     
     # print(norm_score)
     
     pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(pc.cpu().numpy())
+    pcd.points = o3d.utility.Vector3dVector(pc)
 
     # viridis = cm.get_cmap('YlOrRd')
     # viridis = cm.get_cmap('plasma')
@@ -61,9 +62,7 @@ def vis_score_pc(pc, scores):
     # viridis = cm.get_cmap('Greys')
     viridis = cm.get_cmap('rainbow')
     
-    # print(viridis)
     colors = viridis(norm_score).squeeze()[:, :3] # N x 3
-    # print(colors)
 
     # 设置点云颜色
     pcd.colors = o3d.utility.Vector3dVector(colors)
