@@ -21,4 +21,4 @@ bash ./scripts/run_handle.sh
 bash ./scripts/inference_handle.sh
 ```
 
-new dataset can be generated with run_handle.sh, if you don't want to generate new data, just add the `dataset_path` in the sh file.
+new dataset can be generated with `run_handle.sh`, if you don't want to generate new data, just add the `dataset_path` in the sh file.
