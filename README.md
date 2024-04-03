@@ -9,6 +9,8 @@ We will update the way to use it as soon as possible.
 ## Citation
 If you find our work useful, please cite it.
 
+
+## Train and inference
 ```bash
 cd A2G
 
