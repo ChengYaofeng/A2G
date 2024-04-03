@@ -7,13 +7,16 @@ We will update the way to use it as soon as possible.
 [paper]()
 
 ## Citation
-If you find our work useful, please cite.
-```latex
-```
+If you find our work useful, please cite it.
 
-All the executable files can be found in scripts.
-``
+```bash
 cd A2G
 
-bash ./scripts/train
-``
+# train
+bash ./scripts/run_handle.sh
+
+# inference
+bash ./scripts/inference_handle.sh
+```
+
+new dataset can be generated with run_handle.sh, if you don't want to generate new data, just add the `dataset_path` in the sh file.
