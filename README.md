@@ -1,4 +1,4 @@
-# A2G: Intuitive Physics Helps Robot Grasp Better to Improve the Manipulation Performance
+# A2G: Leveraging Intuitive Physics for Force-Efficient Robotic Grasping
 
 This is the code of "A2G: Intuitive Physics Helps Robot Grasp Better to Improve the Manipulation Performance"
 
