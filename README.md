@@ -9,7 +9,7 @@ We will update the way to use it as soon as possible.
 ## Citation
 If you find our work useful, please cite it.
 ```
-@ARTICLE{10531637,
+@ARTICLE{cheng2024a2g,
   author={Cheng, Yaofeng and Liu, Shengkai and Zha, Fusheng and Guo, Wei and Du, Haoyu and Wang, Pengfei and Bing, Zhenshan},
   journal={IEEE Robotics and Automation Letters}, 
   title={A2G: Leveraging Intuitive Physics for Force-Efficient Robotic Grasping}, 
