@@ -4,7 +4,7 @@ This is the code of "A2G: Intuitive Physics Helps Robot Grasp Better to Improve 
 
 We will update the way to use it as soon as possible.
 
-[paper](https://ieeexplore.ieee.org/abstract/document/10531637)
+[paper](https://ieeexplore.ieee.org/abstract/document/10531637), [video](https://www.youtube.com/watch?v=-j9SkiYL1Rc&t=4s)
 
 ## Citation
 If you find our work useful, please cite it.
